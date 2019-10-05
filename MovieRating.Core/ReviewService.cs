@@ -2,6 +2,7 @@
 using MovieRating.Infrastructure.JSONReader;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MovieRating.Core.MovieRating.Core
 
@@ -108,18 +109,92 @@ namespace MovieRating.Core.MovieRating.Core
             return NumberOfReviews;
         }
 
-        public int MovieWithMostHighestGradeRate()
-            // Continue here
+        public List<int> MovieWithMostHighestGradeRate()
         {
-            int movie = 0;
+
+            Dictionary<int, int> Movies = new Dictionary<int, int>();
+            
             
             foreach (Review Review in Reviews)
             {
+                if(Review.Grade == 5)
+                {
+                    Movies[Review.Movie]++;
+                    
+                }
+
+            }
+
+            int max = 0;
+            foreach (var pair in Movies)
+            {
+                if (pair.Value > max)
+                    max = pair.Value;
+            }
+            List<int> MoviesWithMostOfHighestGrade = new List<int>();
+            foreach (var pair in Movies)
+            {
+                if (pair.Value == max)
+                    MoviesWithMostOfHighestGrade.Add(pair.Key);
+            }
+            return MoviesWithMostOfHighestGrade;
+        }
+
+        public List<int> ReviewersWithMostReviews()
+        {
+
+            Dictionary<int, int> ReviewersReviews = new Dictionary<int, int>();
+
+
+            foreach (Review Review in Reviews)
+            {
+
+                    ReviewersReviews[Review.Reviewer]++;
                 
 
             }
 
-            return movie;
+            int max = 0;
+            foreach (var pair in ReviewersReviews)
+            {
+                if (pair.Value > max)
+                    max = pair.Value;
+            }
+            List<int> ReviewersWithMostReviews = new List<int>();
+            foreach (var pair in ReviewersReviews)
+            {
+                if (pair.Value == max)
+                    ReviewersWithMostReviews.Add(pair.Key);
+            }
+            return ReviewersWithMostReviews;
+        }
+
+        public List<int> TopNMovies(int N)
+        {
+
+            List<int> TopNMovies = new List<int>();
+            Dictionary<int, double> ReviewsAvarageGrade = new Dictionary<int, double>();
+
+            foreach (Review Review in Reviews)
+            {
+
+                ReviewsAvarageGrade[Review.Movie] = AvarageReviewOfMovie(Review.Movie);
+
+        
+
+            }
+
+            var ordered = ReviewsAvarageGrade.OrderBy((i => i.Value));
+          
+
+            for (int i = 0; (i < N) && (i < ordered.Count()); i++)
+            {
+
+                TopNMovies.Add(ordered.ElementAt(i).Key);
+            }
+
+
+            return TopNMovies;
         }
 
 
@@ -129,7 +204,7 @@ namespace MovieRating.Core.MovieRating.Core
         public ReviewService(ReviewRepository repo)
         {
             Repo = repo;
-            Reviews = Repo.LoadReviews();
+            Reviews = Repo.Get();
         }
     }
 }

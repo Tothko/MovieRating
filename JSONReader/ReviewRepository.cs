@@ -1,4 +1,5 @@
 ﻿using MovieRating.Core.Entities.Entities;
+using MovieRating.JSONReader;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,31 @@ using System.IO;
 namespace MovieRating.Infrastructure.JSONReader
 
 {
-    public class ReviewRepository
+    public class ReviewRepository : IRepository
 
     {
-        private readonly string JsonPath = @"/../../ratings.json";
-        public List<Review> LoadReviews()
+        List<Review> Reviews;
+        public ReviewRepository()
         {
-            List<Review> Reviews = new List<Review>();
+            Reviews = new List<Review>();
+            LoadJason();
+        }
+
+        private readonly string JsonPath = @"/../../ratings.json";
+
+        public void Add(Review review)
+        {
+            Reviews.Add(review);
+        }
+
+        public List<Review> Get()
+        {
+            return Reviews;
+        }
+
+        private void LoadJason()
+        {
+            
             
                 using (StreamReader r = new StreamReader(JsonPath))
                 {
@@ -21,7 +40,7 @@ namespace MovieRating.Infrastructure.JSONReader
                     Reviews = JsonConvert.DeserializeObject<List<Review>>(json);
                 }
             
-            return Reviews;
+            
         }
     }
 }
