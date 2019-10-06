@@ -1,5 +1,4 @@
 ﻿using MovieRating.Core.Entities.Entities;
-using MovieRating.JSONReader;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

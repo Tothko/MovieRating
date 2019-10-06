@@ -10,14 +10,14 @@ namespace MovieRating.Core.MovieRating.Core
     public class ReviewService
     {
 
-        ReviewRepository Repo;
+        IRepository Repo;
         List<Review> Reviews;
-        public int CountOfUserReviews(int x)
+        public int CountOfUserReviews(int Reviewer)
         {
             int ReviewCount = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Reviewer == x)
+                if (Review.Reviewer == Reviewer)
                 {
                     ReviewCount++;
                 }
@@ -26,46 +26,46 @@ namespace MovieRating.Core.MovieRating.Core
             return ReviewCount;
         }
 
-        public double AvarageReviewOfUser(int x)
+        public double AvarageReviewOfUser(int Reviewer)
         {
             int ReviewCount = 0;
             double TotalReviewValue = 0;
             double AvarageReviewValue = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Reviewer == x)
+                if (Review.Reviewer == Reviewer)
                 {
                     TotalReviewValue += Review.Grade;
                     ReviewCount++;
                 }
 
             }
-            if (AvarageReviewValue != 0 && ReviewCount != 0) AvarageReviewValue = TotalReviewValue / ReviewCount;
+            if (ReviewCount != 0) AvarageReviewValue = TotalReviewValue / ReviewCount;
             return AvarageReviewValue;
         }
 
-        public int CountOfSpecificGradesForMovieByUser(int x, int y)
+        public int CountOfSpecificGradesForMovieByUser(int Reviewer, int Grade)
 
         {
             int NumberOfReviews = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Reviewer == y && Review.Movie == x)
+                if (Review.Reviewer == Reviewer && Review.Grade == Grade)
                 {
                     NumberOfReviews++;
                 }
 
             }
-            
+
             return NumberOfReviews;
         }
 
-        public int CountOfMovieReviews(int x)
+        public int CountOfMovieReviews(int Movie)
         {
             int ReviewCount = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Movie == x)
+                if (Review.Movie == Movie)
                 {
                     ReviewCount++;
                 }
@@ -74,32 +74,32 @@ namespace MovieRating.Core.MovieRating.Core
             return ReviewCount;
         }
 
-        public double AvarageReviewOfMovie(int x)
+        public double AvarageReviewOfMovie(int Movie)
         {
             int ReviewCount = 0;
             double TotalReviewValue = 0;
             double AvarageReviewValue = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Movie == x)
+                if (Review.Movie == Movie)
                 {
                     TotalReviewValue += Review.Grade;
                     ReviewCount++;
                 }
 
             }
-            if (AvarageReviewValue != 0 && ReviewCount != 0) AvarageReviewValue = TotalReviewValue / ReviewCount;
+            if (ReviewCount != 0) AvarageReviewValue = TotalReviewValue / ReviewCount;
 
             return AvarageReviewValue;
         }
 
-        public int CountOfSpecificGradesForMovie(int x, int y)
+        public int CountOfSpecificGradesForMovie(int Movie, int Grade)
 
         {
             int NumberOfReviews = 0;
             foreach (Review Review in Reviews)
             {
-                if (Review.Movie == x && Review.Grade == y)
+                if (Review.Movie == Movie && Review.Grade == Grade)
                 {
                     NumberOfReviews++;
                 }
@@ -112,20 +112,23 @@ namespace MovieRating.Core.MovieRating.Core
         public List<int> MovieWithMostHighestGradeRate()
         {
 
-            Dictionary<int, int> Movies = new Dictionary<int, int>();
-            
-            
+            Dictionary<int, double> Movies = new Dictionary<int, double>();
+
+
             foreach (Review Review in Reviews)
             {
-                if(Review.Grade == 5)
+                if (Review.Grade == 5)
                 {
-                    Movies[Review.Movie]++;
-                    
+                    if (!Movies.ContainsKey(Review.Movie))
+                    {
+                        Movies.Add(Review.Movie, Review.Grade);
+                    }
+
                 }
 
             }
 
-            int max = 0;
+            double max = 0;
             foreach (var pair in Movies)
             {
                 if (pair.Value > max)
@@ -145,12 +148,13 @@ namespace MovieRating.Core.MovieRating.Core
 
             Dictionary<int, int> ReviewersReviews = new Dictionary<int, int>();
 
-
+            
             foreach (Review Review in Reviews)
             {
 
-                    ReviewersReviews[Review.Reviewer]++;
-                
+                if (!ReviewersReviews.ContainsKey(Review.Reviewer)){
+                    ReviewersReviews.Add(Review.Reviewer, CountOfUserReviews(Review.Reviewer));
+                }
 
             }
 
@@ -168,8 +172,9 @@ namespace MovieRating.Core.MovieRating.Core
             }
             return ReviewersWithMostReviews;
         }
-
+        
         public List<int> TopNMovies(int N)
+    
         {
 
             List<int> TopNMovies = new List<int>();
@@ -180,12 +185,12 @@ namespace MovieRating.Core.MovieRating.Core
 
                 ReviewsAvarageGrade[Review.Movie] = AvarageReviewOfMovie(Review.Movie);
 
-        
+
 
             }
 
             var ordered = ReviewsAvarageGrade.OrderBy((i => i.Value));
-          
+
 
             for (int i = 0; (i < N) && (i < ordered.Count()); i++)
             {
@@ -197,11 +202,31 @@ namespace MovieRating.Core.MovieRating.Core
             return TopNMovies;
         }
 
+        public List<Review> MoviesOfReviewerSortedByRateThenDate(int Reviewer)
+        {
+            List<Review> MoviesOfReviewerSortedByRateThenDate = new List<Review>();
+            foreach (Review Review in Reviews)
+            {
+                if (Review.Reviewer == Reviewer) MoviesOfReviewerSortedByRateThenDate.Add(Review);
+            }
+            Reviews.OrderByDescending(a => a.Grade).ThenByDescending(a => a.Date);
+            return MoviesOfReviewerSortedByRateThenDate;
+        }
+
+        public List<Review> ReviewersOfMovieSortedByRateThenDate(int Movie)
+        {
+            List<Review> MoviesOfReviewerSortedByRateThenDate = new List<Review>();
+            foreach (Review Review in Reviews)
+            {
+                if (Review.Movie == Movie) MoviesOfReviewerSortedByRateThenDate.Add(Review);
+            }
+            Reviews.OrderByDescending(a => a.Grade).ThenByDescending(a => a.Date);
+            return MoviesOfReviewerSortedByRateThenDate;
+        }
 
 
 
-
-        public ReviewService(ReviewRepository repo)
+        public ReviewService(IRepository repo)
         {
             Repo = repo;
             Reviews = Repo.Get();

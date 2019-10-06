@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MovieRating.Infrastructure.JSONReader
 {
-    interface IRepository
+    public interface IRepository
 
     {
         void Add(Review review);

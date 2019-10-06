@@ -5,7 +5,7 @@ using MovieRating.Core.Entities.Entities;
 
 namespace MovieRating.Infrastructure.JSONReader
 {
-    class FakeRepository : IRepository
+    public class FakeRepository : IRepository
     {
         private List<Review> Reviews;
 
