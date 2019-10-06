@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace MovieRating.UnitTests.XUnitTest
 {
-    public class UnitTest1
+    public class UnitTests
     {
         
         [Theory]
