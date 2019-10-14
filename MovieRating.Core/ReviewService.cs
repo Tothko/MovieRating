@@ -62,16 +62,9 @@ namespace MovieRating.Core.MovieRating.Core
 
         public int CountOfMovieReviews(int Movie)
         {
-            int ReviewCount = 0;
-            foreach (Review Review in Reviews)
-            {
-                if (Review.Movie == Movie)
-                {
-                    ReviewCount++;
-                }
-
-            }
-            return ReviewCount;
+            return Reviews
+                .Where(r => r.Movie == Movie)
+                .Count();
         }
 
         public double AvarageReviewOfMovie(int Movie)
@@ -96,110 +89,61 @@ namespace MovieRating.Core.MovieRating.Core
         public int CountOfSpecificGradesForMovie(int Movie, int Grade)
 
         {
-            int NumberOfReviews = 0;
-            foreach (Review Review in Reviews)
-            {
-                if (Review.Movie == Movie && Review.Grade == Grade)
-                {
-                    NumberOfReviews++;
-                }
-
-            }
-
-            return NumberOfReviews;
+            return Reviews
+                .Where(r => r.Movie == Movie && r.Grade == Grade)
+                .Count();
         }
 
-        public List<int> MovieWithMostHighestGradeRate()
+        public IEnumerable<int> MovieWithMostHighestGradeRate()
         {
-
-            Dictionary<int, double> Movies = new Dictionary<int, double>();
-
-
-            foreach (Review Review in Reviews)
-            {
-                if (Review.Grade == 5)
+            var orderedTop = Reviews
+                .Where(r => r.Grade == 5)
+                .GroupBy(r => new { MovieId = r.Movie })
+                .Select(r => new
                 {
-                    if (!Movies.ContainsKey(Review.Movie))
-                    {
-                        Movies.Add(Review.Movie, Review.Grade);
-                    }
+                    Id = r.Key.MovieId,
+                    Count = r.Count()
+                })
+                .OrderByDescending(r => r.Count);
 
-                }
+            var max = orderedTop.First().Count;
 
-            }
-
-            double max = 0;
-            foreach (var pair in Movies)
-            {
-                if (pair.Value > max)
-                    max = pair.Value;
-            }
-            List<int> MoviesWithMostOfHighestGrade = new List<int>();
-            foreach (var pair in Movies)
-            {
-                if (pair.Value == max)
-                    MoviesWithMostOfHighestGrade.Add(pair.Key);
-            }
-            return MoviesWithMostOfHighestGrade;
+            return orderedTop
+                .Where(r => r.Count == max)
+                .Select(r => r.Id);
         }
 
-        public List<int> ReviewersWithMostReviews()
+        public IEnumerable<int> ReviewersWithMostReviews()
         {
+            var orderedTop = Reviews
+                .GroupBy(r => new { Reviewer = r.Reviewer })
+                .Select(r => new
+                {
+                    Reviewer = r.Key.Reviewer,
+                    Count = r.Count()
+                })
+                .OrderByDescending(r => r.Count);
 
-            Dictionary<int, int> ReviewersReviews = new Dictionary<int, int>();
+            var max = orderedTop.First().Count;
 
-            
-            foreach (Review Review in Reviews)
-            {
-
-                if (!ReviewersReviews.ContainsKey(Review.Reviewer)){
-                    ReviewersReviews.Add(Review.Reviewer, CountOfUserReviews(Review.Reviewer));
-                }
-
-            }
-
-            int max = 0;
-            foreach (var pair in ReviewersReviews)
-            {
-                if (pair.Value > max)
-                    max = pair.Value;
-            }
-            List<int> ReviewersWithMostReviews = new List<int>();
-            foreach (var pair in ReviewersReviews)
-            {
-                if (pair.Value == max)
-                    ReviewersWithMostReviews.Add(pair.Key);
-            }
-            return ReviewersWithMostReviews;
+            return orderedTop
+                .Where(r => r.Count == max)
+                .Select(r => r.Reviewer);
         }
         
-        public List<int> TopNMovies(int N)
+        public IEnumerable<int> TopNMovies(int N)
     
         {
-
-            List<int> TopNMovies = new List<int>();
-            Dictionary<int, double> ReviewsAvarageGrade = new Dictionary<int, double>();
-
-            foreach (Review Review in Reviews)
-            {
-
-                ReviewsAvarageGrade[Review.Movie] = AvarageReviewOfMovie(Review.Movie);
-
-
-
-            }
-
-            var ordered = ReviewsAvarageGrade.OrderBy((i => i.Value));
-
-
-            for (int i = 0; (i < N) && (i < ordered.Count()); i++)
-            {
-
-                TopNMovies.Add(ordered.ElementAt(i).Key);
-            }
-
-
-            return TopNMovies;
+            return Reviews
+                .GroupBy(r => new { MovieId = r.Movie })
+                .Select(r => new
+                {
+                    Average = r.Average(p => p.Grade),
+                    MovieId = r.Key.MovieId
+                })
+                .OrderByDescending(r => r.Average)
+                .Take(N)
+                .Select(x => x.MovieId);  
         }
 
         public List<Review> MoviesOfReviewerSortedByRateThenDate(int Reviewer)

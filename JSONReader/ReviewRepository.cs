@@ -12,12 +12,19 @@ namespace MovieRating.Infrastructure.JSONReader
     {
         List<Review> Reviews;
         public ReviewRepository()
+            :this(@"/../../ratings.json")
         {
+
+        }
+
+        public ReviewRepository(String jsonPath)
+        {
+            JsonPath = jsonPath;
             Reviews = new List<Review>();
             LoadJason();
         }
 
-        private readonly string JsonPath = @"/../../ratings.json";
+        private readonly string JsonPath;
 
         public void Add(Review review)
         {

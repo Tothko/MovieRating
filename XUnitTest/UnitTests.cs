@@ -155,11 +155,11 @@ namespace MovieRating.UnitTests.XUnitTest
             Review Review4 = new Review(2, 1, 5, System.DateTime.Now);
             Review Review5 = new Review(1, 4, 5, System.DateTime.Now);
             List<int> expected = new List<int>();
-            expected.Add(Review1.Movie);
-            expected.Add(Review2.Movie);
-            expected.Add(Review3.Movie);
-            expected.Add(Review4.Movie);
-            expected.Add(Review5.Movie);
+            expected.Add(1);
+            expected.Add(4);
+            expected.Add(6);
+            expected.Add(3);
+            expected.Add(2);
             IRepository repo = new FakeRepository();
             repo.Add(Review1);
             repo.Add(Review2);
